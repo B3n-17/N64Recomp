@@ -569,7 +569,13 @@ void N64Recomp::CGenerator::process_binary_op(const BinaryOp& op, const Instruct
     thread_local std::string expression{};
     get_operand_string(op.output, UnaryOpType::None, ctx, output);
     get_binary_expr_string(op.type, op.operands, ctx, output, expression);
-    fmt::print(output_file, "{} = {};\n", output, expression);
+    // OOT fix: func_801C7268 (lw $zero, 0x0($t9)) would result in invalid c code
+    if (output == "0") {
+        fmt::print(output_file, "(void)({});\n", expression);
+    }
+    else {
+        fmt::print(output_file, "{} = {};\n", output, expression);
+    }
 }
 
 void N64Recomp::CGenerator::process_unary_op(const UnaryOp& op, const InstructionContext& ctx) const {
@@ -579,7 +585,13 @@ void N64Recomp::CGenerator::process_unary_op(const UnaryOp& op, const Instructio
     thread_local std::string input{};
     get_operand_string(op.output, UnaryOpType::None, ctx, output);
     get_operand_string(op.input, op.operation, ctx, input);
-    fmt::print(output_file, "{} = {};\n", output, input);
+    // OOT fix: func_801C7268 (lw $zero, 0x0($t9)) would result in invalid c code
+    if (output == "0") {
+        fmt::print(output_file, "(void)({});\n", input);
+    }
+    else {
+        fmt::print(output_file, "{} = {};\n", output, input);
+    }
 }
 
 void N64Recomp::CGenerator::process_store_op(const StoreOp& op, const InstructionContext& ctx) const {
